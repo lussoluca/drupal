@@ -21,13 +21,16 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
+	defer f.Close()
 
 	input := bufio.NewScanner(f)
 	re := regexp.MustCompile("(.*),(.*)\\s\\((.*)\\),?(.*)?")
 	for input.Scan() {
 		submatch := re.FindStringSubmatch(input.Text())
-		project := project.New(submatch[2], submatch[3], submatch[1], submatch[4])
+		project := project.New(submatch[1], submatch[2], submatch[3], submatch[4])
 		projects[submatch[3]] = project
-		fmt.Println(project.GetVersions())
+		if !project.IsCore() {
+			fmt.Printf("%s -> %s -> %v\n", project.ShortName, project.APIVersion, project.Terms)
+		}
 	}
 }
